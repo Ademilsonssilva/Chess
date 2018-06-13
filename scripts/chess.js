@@ -1,3 +1,13 @@
+/**
+ * Developed by Ademilson
+ * ademilsonssilva1@gmail.com
+ *	  _______ ______________  ________   __  _______
+ *	 / ___/ // / __/ __/ __/ / ___/ _ | /  |/  / __/
+ *	/ /__/ _  / _/_\ \_\ \  / (_ / __ |/ /|_/ / _/  
+ *	\___/_//_/___/___/___/  \___/_/ |_/_/  /_/___/  
+ *
+ * jQuery chess game	                                               
+ */
 var activeTurn = "white";
 
 $(document).ready(function () {
@@ -37,7 +47,6 @@ function buildGameTable(target)
 function focusRow (row)
 {
 	row.addClass("selectedFocus");
-	console.log("focused row: " + row.prop("id"));
 }
 
 function unfocusAllRows()
@@ -46,6 +55,7 @@ function unfocusAllRows()
 		$(this).removeClass("selectedFocus");
 		unbindAvaliableMoveAction();
 		$(this).removeClass("avaliableMove");
+		$(this).removeClass("specialMove");
 		$(this).removeClass("opponentPiece");
 		bindPieceActions();
 	});
@@ -174,22 +184,25 @@ function showAvaliablePositions(target)
 	positionInfo = {row: row, col: col, piece: piece, color: color};
 	avaliablePositions = {allowed: [], color: color};
 	
-	if (piece == "rook") {
+	if (piece == "pawn") {
+		pawnMove(avaliablePositions, positionInfo);
+	}
+	else if (piece == "rook") {
 		horizontalMoves(avaliablePositions, positionInfo, false);
 	}
-	if (piece == "king") {
+	else if (piece == "king") {
 		horizontalMoves(avaliablePositions, positionInfo, true);
 		diagonalMoves(avaliablePositions, positionInfo, true);
 	}
-	if (piece == "queen") {
+	else if (piece == "queen") {
 		horizontalMoves(avaliablePositions, positionInfo, false);
 		diagonalMoves(avaliablePositions, positionInfo, false);
 	}
-	if (piece == "bishop") {
+	else if (piece == "bishop") {
 		diagonalMoves(avaliablePositions, positionInfo, false);	
 	}
-	if (piece == "pawn") {
-		pawnMove(avaliablePositions, positionInfo);
+	else if (piece == "knight") {
+		knightMove(avaliablePositions, positionInfo);
 	}
 
 	for (i=0; i< avaliablePositions.allowed.length; i++) {
@@ -198,6 +211,12 @@ function showAvaliablePositions(target)
 		}
 		else {
 			$("#"+avaliablePositions.allowed[i]).addClass("avaliableMove");	
+		}
+		if (piece == "pawn") {
+			avaliablePositionSplitted = avaliablePositions.allowed[i].split("-");
+			if (avaliablePositionSplitted[0] == 1 || avaliablePositionSplitted[0] == 8) {
+				$("#"+avaliablePositions.allowed[i]).addClass("specialMove");
+			}
 		}
 	}
 
@@ -245,8 +264,16 @@ function movePiece(selected, target)
 	if ($("#"+target.id).hasClass("piece")) {
 		removePiece($("#"+target.id));
 	}
+	
+	if ($("#"+target.id).hasClass("specialMove")) {
+		if (selected.piece == "pawn") {
+			selected.piece = pawnPromotionDialog();
+		}
+	}
+
 	removePiece($("#"+selected.id));
 	showPiece($("#"+target.id), selected.color, selected.piece);
+	
 	toggleTurn();
 	
 	unbindAvaliableMoveAction();
@@ -484,6 +511,46 @@ function pawnMove(array, target)
 
 }
 
+function knightMove (array, target)
+{
+	//up
+	if (target.row - 2 >= 1) {
+		if (target.col -1 >= 1) {
+			verifyAllowedMove(array, parseInt(target.row -2) + "-" + parseInt(target.col - 1));
+		}
+		if (parseInt(target.col) + 1 <= 8){
+			verifyAllowedMove(array, parseInt(target.row -2) + "-" + (parseInt(target.col) + 1));
+		}
+	}
+	//down
+	if (parseInt(target.row) + 2 <= 8) {
+		if (target.col -1 >= 1) {
+			verifyAllowedMove(array, (parseInt(target.row) + 2) + "-" + parseInt(target.col - 1));
+		}
+		if (parseInt(target.col) + 1 <= 8){
+			verifyAllowedMove(array, (parseInt(target.row) + 2) + "-" + (parseInt(target.col) + 1));
+		}
+	}
+	//left
+	if (target.col - 2 >= 1) {
+		if (target.row - 1 >= 1) {
+			verifyAllowedMove(array, parseInt(target.row -1) + "-" + parseInt(target.col - 2));
+		}
+		if (parseInt(target.row) + 1 <= 8){
+			verifyAllowedMove(array, (parseInt(target.row) +1) + "-" + (parseInt(target.col) - 2));
+		}
+	}
+	//right
+	if (parseInt(target.col) + 2 <= 8) {
+		if (target.row - 1 >= 1) {
+			verifyAllowedMove(array, parseInt(target.row -1) + "-" + (parseInt(target.col) + 2));
+		}
+		if (parseInt(target.row) + 1 <= 8){
+			verifyAllowedMove(array, (parseInt(target.row) +1) + "-" + (parseInt(target.col) + 2));
+		}
+	}
+}
+
 function verifyPawnMove(array, target)
 {
 	reallyAllowed = []
@@ -507,6 +574,45 @@ function verifyPawnMove(array, target)
 		}
 	}
 	array.allowed = reallyAllowed;
+}
+
+function castlingMove()
+{
+
+}
+
+function pawnPromotionDialog() //still not working
+{
+	$("#dialogPawnPromotion").html("Choose a piece to promote pawn");
+	var selectedPiece = "queen";
+	$("#dialogPawnPromotion").dialog({
+		modal: true,
+		closeOnEscape: false,
+		dialogClass: "no-close",
+		buttons: {
+			'QUEEN': function () {
+				selectedPiece = "queen";
+				$(this).dialog("close");
+			},
+			'KNIGHT': function () {
+				selectedPiece = "knight";
+				$(this).dialog("close");
+			}, 
+			'ROOK': function () {
+				selectedPiece = "rook";
+				$(this).dialog("close");
+			},
+			'BISHOP': function () {
+				selectedPiece = "bishop";
+				$(this).dialog("close");
+			}
+		},
+		close: function () {
+			return selectedPiece;
+		}
+	});
+	console.log("ja retornou " +selectedPiece);
+	return selectedPiece;
 }
 
 function toggleTurn()

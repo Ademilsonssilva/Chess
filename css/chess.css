@@ -63,9 +63,9 @@ table, tr, td {
 	background-color: red !important;
 }
 
-
-
-
+.specialMove {
+	background-color: purple !important;
+}
 
 table {
 	border: 8px solid #A0522D;
