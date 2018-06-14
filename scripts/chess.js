@@ -267,7 +267,7 @@ function movePiece(selected, target)
 	
 	if ($("#"+target.id).hasClass("specialMove")) {
 		if (selected.piece == "pawn") {
-			selected.piece = pawnPromotionDialog();
+			pawnPromotionDialog(selected, target);
 		}
 	}
 
@@ -581,7 +581,7 @@ function castlingMove()
 
 }
 
-function pawnPromotionDialog() //still not working
+function pawnPromotionDialog(selected, target)
 {
 	$("#dialogPawnPromotion").html("Choose a piece to promote pawn");
 	var selectedPiece = "queen";
@@ -608,7 +608,9 @@ function pawnPromotionDialog() //still not working
 			}
 		},
 		close: function () {
-			return selectedPiece;
+			removePiece($("#"+target.id));
+			showPiece($("#"+target.id), selected.color, selectedPiece);
+			unfocusAllRows();
 		}
 	});
 	console.log("ja retornou " +selectedPiece);
