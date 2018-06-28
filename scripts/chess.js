@@ -31,7 +31,7 @@ function buildGameTable(target)
 		tr = $("<tr class='gameTR'></tr>");
 
 		for(col=1; col < 9; col++) {
-			td = $("<td class='gameTD' id=" + row + "-" + col + "> </td>");
+			td = $("<td class='gameTD' id=" + row + "-" + col + " row="+row+" col="+col+"> </td>");
 			if ((col + row) % 2 == 1) {
 				td.addClass("darkBackground");
 			}
@@ -57,6 +57,7 @@ function unfocusAllRows()
 		$(this).removeClass("avaliableMove");
 		$(this).removeClass("specialMove");
 		$(this).removeClass("opponentPiece");
+		$(this).removeAttr("castlingSide");
 		bindPieceActions();
 	});
 }
@@ -140,15 +141,18 @@ function organizeBoard(player)
 				break;
 		}
 
-		showPiece($("#"+back_row+"-"+i), player.color, piece);
+		showPiece($("#"+back_row+"-"+i), player.color, piece, true);
 	}
 }
 
-function showPiece(row, color, piece)
+function showPiece(row, color, piece, initialPosition = false)
 {
 	row.addClass("piece "+color+"_"+piece);
 	row.attr("piece", piece);
 	row.attr("color", color);
+	if (initialPosition) {
+		row.addClass("initialPosition");
+	}
 }
 
 function bindPieceActions()
@@ -181,7 +185,7 @@ function showAvaliablePositions(target)
 	piece = target.attr("piece");
 	color = target.attr("color");
 
-	positionInfo = {row: row, col: col, piece: piece, color: color};
+	positionInfo = {row: row, col: col, piece: piece, color: color, id: target.attr("id")};
 	avaliablePositions = {allowed: [], color: color};
 	
 	if (piece == "pawn") {
@@ -193,6 +197,7 @@ function showAvaliablePositions(target)
 	else if (piece == "king") {
 		horizontalMoves(avaliablePositions, positionInfo, true);
 		diagonalMoves(avaliablePositions, positionInfo, true);
+		verifyCastlingMove(avaliablePositions, positionInfo);
 	}
 	else if (piece == "queen") {
 		horizontalMoves(avaliablePositions, positionInfo, false);
@@ -267,7 +272,10 @@ function movePiece(selected, target)
 	
 	if ($("#"+target.id).hasClass("specialMove")) {
 		if (selected.piece == "pawn") {
-			pawnPromotionDialog(selected, target);
+			pawnPromotionMove(selected, target);
+		}
+		if (selected.piece == "king") {
+			castlingMove(selected, target);
 		}
 	}
 
@@ -294,7 +302,7 @@ function logPosition(row)
 function removePiece (row)
 {
 	selected = getPositionInfo(row);
-	row.removeClass("piece selectedFocus "+selected.color + "_" + selected.piece);
+	row.removeClass("piece selectedFocus initialPosition "+selected.color + "_" + selected.piece);
 	row.removeAttr("color");
 	row.removeAttr("piece");
 	row.unbind("click");
@@ -576,12 +584,71 @@ function verifyPawnMove(array, target)
 	array.allowed = reallyAllowed;
 }
 
-function castlingMove()
+function castlingMove(selected, target)
 {
+	if ($("#"+target.id).attr("castlingSide") == "left"){
+		atualPosition = $("#"+target.id).attr("row") + "-1";
+		newPosition = $("#"+target.id).attr("row") + "-3"; 
+	}
+	else if ($("#"+target.id).attr("castlingSide") == "right"){
+		atualPosition = $("#"+target.id).attr("row") + "-8";
+		newPosition = $("#"+target.id).attr("row") + "-5"; 
+	}
 
+	showPiece($("#"+newPosition), selected.color, "rook");
+	removePiece($("#"+atualPosition));
 }
 
-function pawnPromotionDialog(selected, target)
+function verifyCastlingMove(avaliablePositions, king)
+{
+	if ($("#"+king.id).hasClass("initialPosition")) {
+		leftCastlingAllowed = true;
+		rightCastlingAllowed = true;
+		for(i = king.col - 1; i>=1; i--) { 
+			if (leftCastlingAllowed) {
+				leftCastlingAllowed = _castlingMoveValidation(king, i, "left");
+			}
+		}
+
+		for(i = parseInt(king.col) + 1; i<=8; i++) {
+			if (rightCastlingAllowed) {
+				rightCastlingAllowed = _castlingMoveValidation(king, i, "right");
+			}
+		}
+
+		if(leftCastlingAllowed){
+			$("#"+king.row+"-2").addClass("specialMove");
+			$("#"+king.row+"-2").attr("castlingSide", "left");
+			avaliablePositions.allowed.push(king.row+"-2");
+		}
+
+		if(rightCastlingAllowed){
+			$("#"+king.row+"-6").addClass("specialMove");
+			$("#"+king.row+"-6").attr("castlingSide", "right");
+			avaliablePositions.allowed.push(king.row+"-6");
+		}
+	}
+}
+
+function _castlingMoveValidation (king, i, castlingSide)
+{
+	if ($("#"+king.row+"-" + i).hasClass("piece")) {
+		if ($("#"+king.row+"-" + i).attr("piece") == "rook" && $("#"+king.row+"-" + i).attr("color") == king.color){
+			if (!$("#"+king.row+"-" + i).hasClass("initialPosition")) {
+				return false;
+			}
+			else {
+				$("#"+king.row+"-" + i).attr("castlingSide", castlingSide);
+			}
+		}
+		else  {
+			return false;
+		}
+	}
+	return true;
+}
+
+function pawnPromotionMove(selected, target)
 {
 	$("#dialogPawnPromotion").html("Choose a piece to promote pawn");
 	var selectedPiece = "queen";
