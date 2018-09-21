@@ -2,11 +2,16 @@
 <!doctype html>
 <html lang="en">
 	<head>
-	    <meta charset="utf-8">		
+		<!-- BOOSTRAP META TAGS -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<!-- END META TAGS -->
+
 		<title> Chess </title>
 
 		<!-- CSS -->
 		<link href="css/chess.css" type="text/css" rel="stylesheet">
+		<link href="node_modules/bootstrap/dist/css/bootstrap.css" type="text/css" rel="stylesheet">
 		<link href="https://code.jquery.com/ui/1.12.1/themes/black-tie/jquery-ui.css" type="text/css" rel="stylesheet">
 		<!-- ENDCSS -->
 
@@ -14,12 +19,21 @@
 
 	<body>
 		<!-- GAME -->
-		<div id="gameDIV"></div>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-11 center">
+					<center>
+						<div id="gameDIV" style="height: 100%;overflow: hidden;"></div>	
+					</center>
+				</div>		
+			</div>
+		</div>
 		<div id="dialogPawnPromotion" style="display: none;" title="PAWN PROMOTION!"></div>
 		<!-- ENDGAME -->
 
 		<!-- SCRIPTS -->
-		<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+		<script src="node_modules/jquery/dist/jquery.min.js"></script>
+		<script src="node_modules/bootstrap/dist/js/bootstrap.js"></script>
 		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script src="scripts/chess.js"></script>
 		<!-- ENDSCRIPTS -->

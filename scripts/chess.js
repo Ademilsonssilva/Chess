@@ -25,7 +25,10 @@ $(document).ready(function () {
 
 function buildGameTable(target)
 {
-	table = $("<table class='gameTable'></table>");
+	height = window.innerHeight;
+	width = window.innerWidth;
+	lower = (height > width ? width : height);
+	table = $("<table class='gameTable' width='"+lower+"' height='"+lower+"'></table>");
 
 	for(row=1; row<9; row++) {
 		tr = $("<tr class='gameTR'></tr>");
