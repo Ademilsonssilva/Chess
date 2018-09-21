@@ -1,12 +1,17 @@
+body{
+	padding: 0px !important;
+	margin-left: -15px !important;
+}
+
 table.gameTable {
 	
 }
 table > tr > td {
-	padding: 25px;
+
 }
 
 table, tr, td {
-	border: 2px solid #A0522D; 
+	border: 1px solid #A0522D; 
 	border-collapse: collapse;
 }
 
@@ -68,7 +73,7 @@ table, tr, td {
 }
 
 table {
-	border: 8px solid #A0522D;
+	border: 2px solid #A0522D;
 }
 
 .darkBackground {

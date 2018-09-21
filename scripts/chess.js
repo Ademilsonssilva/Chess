@@ -34,7 +34,7 @@ function buildGameTable(target)
 		tr = $("<tr class='gameTR'></tr>");
 
 		for(col=1; col < 9; col++) {
-			td = $("<td class='gameTD' id=" + row + "-" + col + " row="+row+" col="+col+"> </td>");
+			td = $("<td class='gameTD' width='12.5%' id=" + row + "-" + col + " row="+row+" col="+col+"> </td>");
 			if ((col + row) % 2 == 1) {
 				td.addClass("darkBackground");
 			}
